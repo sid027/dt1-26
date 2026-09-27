@@ -1,0 +1,27 @@
+FROM python:3.13-slim
+
+# Install dependencies including git for cloning
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Clone the Streamlit example repo into /app
+RUN git clone https://github.com/streamlit/streamlit-example.git /app
+
+# Copy custom files into /app (overwriting repo files if necessary)
+COPY frontend.py Pipfile Pipfile.lock .env /app/
+
+WORKDIR /app
+
+RUN pip3 install -U pip && \
+    pip3 install pipenv && \
+    pip3 install pexpect && \
+    pipenv install --system --deploy --ignore-pipfile
+
+EXPOSE 8501
+
+HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
+
+ENTRYPOINT ["streamlit", "run", "frontend.py", "--server.port=8501", "--server.address=0.0.0.0"]

@@ -1,0 +1,16 @@
+FROM python:3.13-alpine
+
+COPY api.py Pipfile Pipfile.lock ./app/
+
+WORKDIR /app
+
+RUN pip3 install -U pip && \
+    pip3 install pipenv && \
+    pip3 install pexpect && \
+    pipenv install --system --deploy --ignore-pipfile
+
+ENTRYPOINT [ "python" ]
+
+EXPOSE 5001
+
+CMD ["api.py" ]
